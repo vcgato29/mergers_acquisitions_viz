@@ -1,0 +1,25 @@
+doctype
+html
+  head
+    title Mergers&Acquisitions Interactive Visualization
+    meta(charset='utf-8')
+    link(href='lib/styling.css', rel='stylesheet')
+
+  body
+    header
+      .content
+        h1 Mergers&Acquisitions Interactive Visualization
+
+    section#vis
+      .content
+        #loading Loading
+        #transactions
+          #pie-wrapper
+            svg.piechart
+
+        
+        h2 Acquirer Activities
+
+    script(src='lib/d3.v2.min.js')    
+    script(src='lib/colorbrewer.js')
+    script(src='vis.js')
