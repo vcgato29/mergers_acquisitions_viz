@@ -68,7 +68,7 @@ var vis = function(data){
 							   .map(data.text, d3.map);
 
 		data.groupBarData = []
-		data.types = ['Executive/Board Changes - Other', 'Lawsuits & Legal Issues', 'Business Expansions'];
+		data.types = ['Executive/Board Changes - Other', 'Lawsuits & Legal Issues', 'Business Expansions'].reverse();
 		//data.company_short_names = [];
 		for (var c_name in data.byType) {
 			//company_short_names.push(getShortName(c_name));
@@ -95,6 +95,8 @@ var vis = function(data){
 				})
 			}
 		})
+
+		data.variables = d3.keys(data.values[0]).filter(function(key) { return key !== "Company" && key !== "Company_Name" && key !== "YEAR" })
 
 		return data
 	})();
@@ -124,7 +126,7 @@ var vis = function(data){
 				.attr('width', pieWidth)
 				.attr('height', pieHeight)
 				.append('g')
-				.attr('transform', 'translate(' + pieWidth/2 + ',' + pieHeight/2 + ')');
+				.attr('transform', 'translate(' + pieWidth/2 + ',' + pieWidth/2 + ')');
 		var move_delta = 20;
 
 		pieChart.plot = function() {
@@ -136,7 +138,6 @@ var vis = function(data){
 					})
 			g.append('path')
 				.attr('d', arc)
-
 				.style('fill', function(d) {
 					
 					return colors[d.data.name];
@@ -217,12 +218,55 @@ var vis = function(data){
 		return pieChart;
 	})()
 
+	var tsChart = (function() {
+		var tsChart = {};
+		var margin = {
+			top: 40,
+			right: 40,
+			bottom: 60,
+			left: 40
+			}
+		var controlWidth = 100;
+		var controlHeight = 400;
+		var controlSVG = d3.select('svg.control');
+			
+		
+		//create select bars
+		(function() {
+			d3.select('#variable-selector').append('select')
+				.selectAll('option')
+				.data(data.variables)
+				.enter()
+				.append('option')
+				.attr('value', function(d) { return d; })
+				.text(function(d) { return d; });
+			d3.select('#company-multi-selector').append('select')
+				.attr('id', 'multi-selected-options')
+				.attr('multiple', 'multiple')
+				.selectAll('option')
+				.data(data.groupBarData.map(function(d) { return d.name; }))
+				.enter()
+				.append('option')
+				.attr('value', function(d) { return d; })
+				.text(function(d) { return d; });
+		
+			$('#multi-selected-options').multiSelect();
+			$('#updatebutton').on('click', function() {
+				alert('click update')
+			})
+
+		})()
+
+
+	})();
+	
+	
 	var groupBarChart = (function() {
 		var groupBarChart = {};
 		var margin = {
 			top: 40,
 			right: 40,
-			bottom: 30,
+			bottom: 60,
 			left: 40
 			}
 		var barWidth = 700 - margin.left - margin.right;
@@ -242,11 +286,23 @@ var vis = function(data){
 			.attr('height', barHeight + margin.top + margin.bottom)
 			.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+		
+		function make_y_axis() {
+			return d3.svg.axis().scale(y).orient('left');
+		}
 
+		groupBarChartSVG.append('defs')
+			.append('clipPath')
+			.attr('id', 'clip')
+			.append('rect')
+			.attr('width', barWidth)
+			.attr('height', barHeight);
+		groupBarChartSVG.append('g').attr('class', 'y grid');
+		groupBarChartSVG.select('.y.grid').call(make_y_axis().tickSize(-barWidth, 0, 0).tickFormat(''));
 		groupBarChart.plot = function() {
 			x0.domain(data.groupBarData.map(function(d) { return d.name; }));
 			x1.domain(data.types).rangeRoundBands([0, x0.rangeBand()]);
-			y.domain([0, d3.max(data.groupBarData, function(d) {
+			y.domain([0, 1.2*d3.max(data.groupBarData, function(d) {
 				return d3.max(d.activities, function(a) {
 					return a.value;
 				})
@@ -282,6 +338,26 @@ var vis = function(data){
 				.attr('height', function(d) { return barHeight - y(d.value); })
 				.style('fill', function(d, i) { return bar_colors[d.type]; })
 
+			var legend = groupBarChartSVG.selectAll('.legend')
+				.data(data.types)
+				.enter().append('g')
+				.attr('class', 'legend')
+				.attr('transform', function(d, i) {
+					return "translate(" + i*180 + "," + (barHeight+30) + ")" ;
+				});
+			legend.append('rect')
+				.attr('x', 0)
+				.attr('width', 18)
+				.attr('height', 18)
+				.style('fill', function(d) { return bar_colors[d]; });
+			legend.append('text')
+				.attr('x', 20)
+				.attr('y', 9)
+				.attr('dy', '.35em')
+				.style('text-anchor', 'start')
+				.text(function(d) { return d; })
+				.attr('font-size', '14px')
+
 
 
 		}
@@ -295,6 +371,7 @@ var vis = function(data){
 
 	controller.init()
 }
+
 
 d3.csv('data/data_sample.csv', function(values) {
 	d3.csv('data/transactions_sample.csv', function(transactions) {

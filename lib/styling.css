@@ -10,6 +10,17 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
 #vis .content{width:960px;padding:0 10px;margin:0 auto;position:relative;}
 #vis .content .legend-element{font-size:10px}
 #vis .content #loading{text-align:center;position:absolute;left:0;right:0;top:260px;font-size:50px;color:#737373}
-
+/*
+#vis .content #pie-wrapper {float: left;}
+#vis .content #ts-wrapper {float: right;}
+*/
+.ms-container { width: 250px;}
 
 .pie_table { float: right;}
+.grid .tick {
+  stroke: lightgrey;
+  opacity: 0.7;
+}
+.grid path {
+  stroke-width: 0;
+}

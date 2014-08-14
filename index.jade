@@ -3,6 +3,7 @@ html
   head
     title Mergers&Acquisitions Interactive Visualization
     meta(charset='utf-8')
+    link(href='lib/multiselect/css/multi-select.css', rel='stylesheet')
     link(href='lib/styling.css', rel='stylesheet')
 
   body
@@ -16,8 +17,16 @@ html
         #transactions
           #pie-wrapper
             svg.piechart
+          
+        #financial
+          #control-wrapper 
+            #variable-selector Variable
+            #company-multi-selector
+            button#updatebutton UPDATE
 
-        
+          #ts-wrapper
+            svg.tschart
+
         h2 Acquirer Activities
         h3 Company Activities
         #company-activities
@@ -27,3 +36,7 @@ html
     script(src='lib/d3.v2.min.js')    
     script(src='lib/colorbrewer.js')
     script(src='vis.js')
+    
+    script(src='lib/jquery.min.js')
+    script(src='lib/jquery.tipsy.js')
+    script(src='lib/multiselect/js/jquery.multi-select.js')
