@@ -252,11 +252,27 @@ var vis = function(data){
 		
 			$('#multi-selected-options').multiSelect();
 			$('#updatebutton').on('click', function() {
-				alert('click update')
+				var selected_companies = []
+				$('.ms-elem-selection.ms-selected span').each(function(i, d) {
+					selected_companies.push(d.innerText)
+				})
+				var variable = $('#variable-selector option:selected').val();
+				state = {
+					variable: variable,
+					selected_companies: selected_companies
+					}
+				tsChart.plot(state);	
 			})
 
 		})()
 
+		tsChart.plot = function(opt) {
+			var variable = opt.variable;
+			var selected_companies = opt.selected_companies;
+
+
+			
+		}
 
 	})();
 	
