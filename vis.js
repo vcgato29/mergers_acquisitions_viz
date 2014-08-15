@@ -16,6 +16,23 @@ var vis = function(data){
 			return mapping[fullName];
 		}
 	})()
+	var getFullName = (function() {
+		var mapping = {
+			'ENSG': 'The Ensign Group, Inc. (NasdaqGS:ENSG)',
+			'LHCG': 'LHC Group, Inc. (NasdaqGS:LHCG)',
+			'CVS': 'CVS Caremark Corporation (NYSE:CVS)',
+			'HGR': 'Hanger, Inc. (NYSE:HGR)',
+			'HCA': 'HCA Holdings, Inc. (NYSE:HCA)',
+			'UHS': 'Universal Health Services Inc. (NYSE:UHS)',
+			'CYH': 'Community Health Systems, Inc. (NYSE:CYH)',
+			'WAG': 'Walgreen Co. (NYSE:WAG)',
+			'HMA': 'Health Management Associates Inc.',
+			'AMED': 'Amedisys Inc. (NasdaqGS:AMED)'
+		}
+		return function(shortName) {
+			return mapping[shortName];
+		}
+	})()
 
 	var color_pool = ['rgb(166,206,227)','rgb(31,120,180)','rgb(178,223,138)','rgb(51,160,44)','rgb(251,154,153)','rgb(227,26,28)','rgb(253,191,111)','rgb(255,127,0)','rgb(202,178,214)', 'rgb(153, 153, 153)']
 	var bar_colors = {'Executive/Board Changes - Other': 'rgb(179,226,205)',
@@ -97,6 +114,9 @@ var vis = function(data){
 		})
 
 		data.variables = d3.keys(data.values[0]).filter(function(key) { return key !== "Company" && key !== "Company_Name" && key !== "YEAR" })
+		data.tsData = d3.nest().key(function(d) {
+			return d['Company_Name']
+		}).map(data.values, d3.map)
 
 		return data
 	})();
@@ -218,19 +238,22 @@ var vis = function(data){
 		return pieChart;
 	})()
 
+	var yearParse = d3.time.format('FY%Y').parse;
+	var yearFormat = d3.time.format('FY%Y');
+
 	var tsChart = (function() {
 		var tsChart = {};
 		var margin = {
 			top: 40,
 			right: 40,
 			bottom: 60,
-			left: 40
+			left: 60
 			}
+		var tsWidth = 500 - margin.left - margin.right;
+		var tsHeight = 300 - margin.top - margin.bottom;
 		var controlWidth = 100;
 		var controlHeight = 400;
 		var controlSVG = d3.select('svg.control');
-			
-		
 		//create select bars
 		(function() {
 			d3.select('#variable-selector').append('select')
@@ -266,12 +289,108 @@ var vis = function(data){
 
 		})()
 
+		var tsChartSVG = d3.select('svg.tschart')
+			.attr('width', tsWidth + margin.left + margin.right)
+			.attr('height', tsHeight + margin.top + margin.bottom)
+			.append('g')
+			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		var line = d3.svg.line()
+					.x(function(d) { console.log(d); return x(d.year); })
+					.y(function(d) { return y(d.value); })
+
+		var x = d3.time.scale().range([0, tsWidth]);
+		var y = d3.scale.linear().range([tsHeight, 0]);
+		var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient('bottom')
+			.tickFormat(yearFormat);
+		var yAxis = d3.svg.axis()
+			.scale(y)
+			.orient('left')
+			.tickFormat(d3.format('.3s'))
+			.ticks(5);
+		function make_y_axis() {
+			return d3.svg.axis().scale(y).orient('left');
+		}
+		tsChartSVG.append('g')
+				.attr('class', 'x axis');
+			tsChartSVG.append('g')
+				.attr('class', 'y axis');
+			tsChartSVG.select('.y.axis').append('text')
+				.attr('class', 'y_text')
+				.attr('transform', 'rotate(-90)')
+				.attr('y', 6)
+				.attr('dy', '.71em')
+				.style('text-anchor', 'end');
+		tsChartSVG.append('g').attr('class', 'y grid');
+
+		
 		tsChart.plot = function(opt) {
 			var variable = opt.variable;
 			var selected_companies = opt.selected_companies;
 
+			lines_data  = selected_companies.map(function(company){
 
+				return {
+					name: company,
+					ts_values: data.tsData[getFullName(company)].map(function(d) {
+						return {
+							year: yearParse(d.YEAR),
+							value: +d[variable],
+							company: company
+						}
+					})
+				}
+			})
+			x.domain([d3.min(lines_data, function(l) {
+				return d3.min(l.ts_values, function(t) {
+					return t.year;
+				})
+			}), d3.max(lines_data, function(l) {
+				return d3.max(l.ts_values, function(t) {
+					return t.year;
+				})
+			})])
+			y.domain([0, d3.max(lines_data, function(l) {
+				return d3.max(l.ts_values, function(t) {
+					return t.value;
+				})
+			})])
+			//console.log(x.domain())
+			//console.log(y.domain())
+			tsChartSVG.select('.y.grid').call(make_y_axis().tickSize(-tsWidth, 0, 0).tickFormat(''));
+			tsChartSVG.select('.x.axis').attr('transform', 'translate(0,' + tsHeight + ')')
+				.transition()
+				.call(xAxis);
+
+			tsChartSVG.select('.y.axis')
+				.transition()
+				.call(yAxis);
+				
 			
+			tsChartSVG.select('.y_text').text(variable);
+			tsChartSVG.selectAll('.ts_line').remove();
+			tsChartSVG.selectAll('.ts_line').data(lines_data.map(function(l){ return l.ts_values; }))
+				.enter()
+				.append('path')
+				.attr('class', 'ts_line')
+				.attr('d', line)
+				.style('stroke', function(t) {
+					return colors[t[0]['company']]
+				});
+			
+			tsChartSVG.selectAll('.circle').remove();
+			tsChartSVG.selectAll('.circle')
+				.data([].concat.apply([], lines_data.map(function(l){ return l.ts_values; })))
+				.enter()
+				.append('circle')
+				.attr('class', 'circle')
+				.attr('r', 3)
+				.attr('cx', function(d) { return x(d.year); })
+				.attr('cy', function(d) { return y(d.value); })
+				.style('fill', function(d) { return colors[d['company']]});
+
 		}
 
 	})();
