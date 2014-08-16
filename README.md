@@ -6,6 +6,7 @@ The code can be run on [Python](https://www.python.org/)'s built-in server. See 
 ### Run locally
 Git clone this repository to your local machine. 
 Once Python is installed, change to the project repository. Then runs:
+    $ rake preview
     $ python -m SimpleHTTPServer 8888 &
 Or for Python3+
     $ python -m http.server 8888 &
