@@ -36,3 +36,41 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
   fill-opacity: .125;
   shape-rendering: crispEdges;
 }
+
+#vis .content #main #brush-wrapper .brushchart .x.axis path{display: none;}
+#vis .content #main #brush-wrapper .brushchart .x.axis { font-size: 14px;}
+
+.tipsy .tipsy-inner {
+  background-color: rgba(255,255,255,0.85);
+  color: #000;
+  border: 1px solid #f0f0f0;
+  display: block;
+
+}
+.tipsy .tipsy-inner div.transaction-info {
+
+  text-align: left;
+}
+
+.tipsy .tipsy-inner div.transaction-info p{
+  margin-bottom: 2px;
+  margin-top: 1px;
+  
+}
+
+/*
+.tipsy .tipsy-inner .title-name{
+  font-weight: bold;
+ 
+}
+*/
+.tipsy .tipsy-inner:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
+}
+
+

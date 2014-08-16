@@ -123,12 +123,14 @@ var vis = function(data){
 		data.brushData = data.transactions.map(function(t) {
 			return {
 				announce_date: dateParse(t['All Transactions Announced Date']),
+				str_announce_date: t['All Transactions Announced Date'],
 				buyers: t['Buyers/Investors'],
 				name: getShortName(t['Buyers/Investors']),
 				target: t['Target/Issuer'],
 				transaction_status: t['Transaction Status'],
 				total_transaction_value: t['Total Transaction Value ($USDmm, Historical rate)'],
 				transaction_comments: t['Transaction Comments'],
+				target_state: t['State/Region From Primary Address [Target/Issuer]'],
 				randomNum: Math.random()*2-1
 			}
 		})
@@ -140,7 +142,7 @@ var vis = function(data){
 
 	var brushChart = (function() {
 		var brushChart = {};
-		var main_margin = {top: 40, right: 40, bottom: 60, left: 60};
+		var main_margin = {top: 40, right: 40, bottom: 100, left: 60};
 		var mini_margin = {top: 240, right: 40, bottom: 60, left: 60}
 		var width = 960 - main_margin.left - main_margin.right;
 		var mainHeight = 300 - main_margin.top - main_margin.bottom;
@@ -153,7 +155,10 @@ var vis = function(data){
 		var xAxis = d3.svg.axis()
 			.scale(x)
 			.orient('bottom');
-		
+		var minixAixs = d3.svg.axis()
+			.scale(mini_x)
+			.orient('bottom');
+
 		var brushChartSVG = d3.select('svg.brushchart')
 			.attr('width', width + main_margin.left + main_margin.right)
 			.attr('height', mainHeight + main_margin.top + main_margin.bottom);
@@ -173,13 +178,19 @@ var vis = function(data){
 				.on('brush', brushed);
 		
 		brushChart.plot = function() {
-			
+			main.append('g')
+				.attr('class', 'x axis')
+				.attr('transform', 'translate(0,' + mainHeight + ')')
+				.call(xAxis);
 			main.selectAll('.main.circle')
 				.data(data.brushData)
 				.enter()
 				.append('circle')
 				.attr('class', 'main circle')
-				.attr('r', 12)
+				.attr('r', function(d) {
+					if (d.total_transaction_value === '-') { return 4; }
+					else return Math.log(+d.total_transaction_value+1)*4;
+				})
 				.attr('cx', function(d) { return x(d.announce_date); })
 				.attr('cy', function(d) {
 					return main_y(16*d.randomNum); 
@@ -187,8 +198,19 @@ var vis = function(data){
 				.style('fill', function(d) {
 					return colors[d.name]
 				})
-				.style('opacity', 0.6);
-				
+				.style('opacity', 0.6)
+				.attr('title', function(d, i) {
+					return '<div class="transaction-info"><p>Announced Date: ' + d.str_announce_date + '</p><p>Buyers: ' + d.buyers + '</p><p>Target: '
+					 + d.target + '</p><p>Transaction Status: ' + d.transaction_status + '</p><p class="value">Total Transaction Value ($USDmm, Historical rate):' +
+					 + d.total_transaction_value + '</p><p>Target State: ' + d.target_state +
+					 '</p><p>Transaction Comments: ' +d.transaction_comments + '</p></div>'
+				});
+			mini.append('g')
+				.attr('class', 'x axis')
+				.attr('transform', 'translate(0,' + (10+miniHeight) + ')')
+				.call(minixAixs)
+				;
+
 			mini.append('g')
 				.attr('class', 'x brush')
 				.call(brush)
@@ -200,23 +222,35 @@ var vis = function(data){
 				.enter()
 				.append('circle')
 				.attr('class', 'mini circle')
-				.attr('r', 8)
+				.attr('r', function(d) {
+					if (d.total_transaction_value === '-') { return 1.5; }
+					else return Math.log(+d.total_transaction_value+1)*1.5;
+				})
 				.attr('cx', function(d) { return mini_x(d.announce_date); })
 				.attr('cy', function(d) {
 					return mini_y(16*d.randomNum); })
 				.style('fill', function(d) {
 					return colors[d.name] })
 				.style('opacity', 0.6)
-				
+			$('.main.circle').tipsy({
+				html: true,
+				gravity: 's'
+			});	
 		}
 
 		function brushed() {
 			
-			x.domain(brush.empty() ? x.domain() : brush.extent());
-			//console.log(x.domain())
+			x.domain(brush.empty() ? mini_x.domain() : brush.extent());
+			
 			main.selectAll('.main.circle')
 				.attr('cx', function(d) { return x(d.announce_date); })
-				.attr('cy', function(d) { return main_y(16*d.randomNum); });
+				.attr('cy', function(d) { return main_y(16*d.randomNum); })
+				
+				.on('click', function(d) {
+					alert('Click!')
+				})
+			main.select('.x.axis').call(xAxis);
+			
 		}	
 
 
