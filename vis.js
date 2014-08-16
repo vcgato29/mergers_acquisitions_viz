@@ -57,6 +57,7 @@ var vis = function(data){
 		var controller = {};
 
 		var render = function() {
+			brushChart.plot();
 			pieChart.plot();
 			groupBarChart.plot();
 		};
@@ -118,10 +119,111 @@ var vis = function(data){
 			return d['Company_Name']
 		}).map(data.values, d3.map)
 
+		var dateParse = d3.time.format('%e/%m/%Y').parse;
+		data.brushData = data.transactions.map(function(t) {
+			return {
+				announce_date: dateParse(t['All Transactions Announced Date']),
+				buyers: t['Buyers/Investors'],
+				name: getShortName(t['Buyers/Investors']),
+				target: t['Target/Issuer'],
+				transaction_status: t['Transaction Status'],
+				total_transaction_value: t['Total Transaction Value ($USDmm, Historical rate)'],
+				transaction_comments: t['Transaction Comments'],
+				randomNum: Math.random()*2-1
+			}
+		})
+
 		return data
 	})();
 
 	console.log('data', data)
+
+	var brushChart = (function() {
+		var brushChart = {};
+		var main_margin = {top: 40, right: 40, bottom: 60, left: 60};
+		var mini_margin = {top: 240, right: 40, bottom: 60, left: 60}
+		var width = 960 - main_margin.left - main_margin.right;
+		var mainHeight = 300 - main_margin.top - main_margin.bottom;
+		var miniHeight = 320 - mini_margin.top - mini_margin.bottom;
+		var x = d3.time.scale().range([0, width]);
+		var mini_x = d3.time.scale().range([0, width]);
+		var main_y = d3.scale.linear().range([mainHeight, 0]);
+		var mini_y = d3.scale.linear().range([miniHeight, 0]);
+
+		var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient('bottom');
+		
+		var brushChartSVG = d3.select('svg.brushchart')
+			.attr('width', width + main_margin.left + main_margin.right)
+			.attr('height', mainHeight + main_margin.top + main_margin.bottom);
+		var main = brushChartSVG.append('g')
+			.attr('transform', 'translate(' + main_margin.left + ',' + main_margin.top + ')');
+		var mini = brushChartSVG.append('g')
+			.attr('transform', 'translate(' + mini_margin.left + ',' + mini_margin.top + ')');
+
+		x.domain(d3.extent(data.brushData, function(d) {
+			return d.announce_date;
+		}))
+		mini_x.domain(x.domain())
+		mini_y.domain([-20, 20]);
+		main_y.domain([-20, 20]);
+		var brush = d3.svg.brush()
+				.x(mini_x)
+				.on('brush', brushed);
+		
+		brushChart.plot = function() {
+			
+			main.selectAll('.main.circle')
+				.data(data.brushData)
+				.enter()
+				.append('circle')
+				.attr('class', 'main circle')
+				.attr('r', 12)
+				.attr('cx', function(d) { return x(d.announce_date); })
+				.attr('cy', function(d) {
+					return main_y(16*d.randomNum); 
+				})
+				.style('fill', function(d) {
+					return colors[d.name]
+				})
+				.style('opacity', 0.6);
+				
+			mini.append('g')
+				.attr('class', 'x brush')
+				.call(brush)
+				.selectAll('rect')
+				.attr('y', -12)
+				.attr('height', miniHeight + 27);
+			mini.selectAll('.mini.circle')
+				.data(data.brushData)
+				.enter()
+				.append('circle')
+				.attr('class', 'mini circle')
+				.attr('r', 8)
+				.attr('cx', function(d) { return mini_x(d.announce_date); })
+				.attr('cy', function(d) {
+					return mini_y(16*d.randomNum); })
+				.style('fill', function(d) {
+					return colors[d.name] })
+				.style('opacity', 0.6)
+				
+		}
+
+		function brushed() {
+			
+			x.domain(brush.empty() ? x.domain() : brush.extent());
+			//console.log(x.domain())
+			main.selectAll('.main.circle')
+				.attr('cx', function(d) { return x(d.announce_date); })
+				.attr('cy', function(d) { return main_y(16*d.randomNum); });
+		}	
+
+
+
+
+		return brushChart;
+	})()
 
 	var pieChart = (function() {
 		var pieChart = {};

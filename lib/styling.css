@@ -16,7 +16,9 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
 */
 .ms-container { width: 250px;}
 
-.pie_table { float: right;}
+
+
+.pie_table { float: left;}
 .grid .tick {
   stroke: lightgrey;
   opacity: 0.7;
@@ -27,5 +29,10 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
 
 #vis .content #company-multi-selector { width: 300px;}
 #vis .content #ts-wrapper .ts_line { stroke-width: 3px; fill: none;}
-#vis .content #ts-wrapper {float: right;}
-#vis .content #controller-wrapper {float: left;}
+#vis .content #control-wrapper {float: left;}
+#vis .content #ts-wrapper {float: left;}
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
