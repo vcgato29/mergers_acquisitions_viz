@@ -13,4 +13,12 @@ Or for Python3+
 Once this is running, open your browser and go to http://localhost:8888
 
 
+### Run locally
+
+Once Middleman is installed, change to the project directory. Run `bundle` if needed to install the necessary gems on your system.
+Then run:
+
+    $ rake preview
+
+Point browser to <http://localhost:4569/index.html> for local testing.
 
