@@ -120,7 +120,15 @@ var vis = function(data){
 		}).map(data.values, d3.map)
 
 		var dateParse = d3.time.format('%e/%m/%Y').parse;
-		data.brushData = data.transactions.map(function(t) {
+		data.sortedTransactions = data.transactions.sort(function(a, b){
+			var a_value = a['Total Transaction Value ($USDmm, Historical rate)'] === '-' ? 0 : +a['Total Transaction Value ($USDmm, Historical rate)']
+			var b_value = b['Total Transaction Value ($USDmm, Historical rate)'] === '-' ? 0 : +b['Total Transaction Value ($USDmm, Historical rate)']
+			return a_value > b_value ? -1 : 1
+			
+		})
+		
+		data.brushData = data.sortedTransactions.map(function(t) {
+			console.log(t['Total Transaction Value ($USDmm, Historical rate)'])
 			return {
 				announce_date: dateParse(t['All Transactions Announced Date']),
 				str_announce_date: t['All Transactions Announced Date'],
@@ -131,9 +139,11 @@ var vis = function(data){
 				total_transaction_value: t['Total Transaction Value ($USDmm, Historical rate)'],
 				transaction_comments: t['Transaction Comments'],
 				target_state: t['State/Region From Primary Address [Target/Issuer]'],
-				randomNum: Math.random()*2-1
+				randomNum: t['Total Transaction Value ($USDmm, Historical rate)'] > 0 ? Math.random()-1 : Math.random()*2-1
 			}
 		})
+		//sort brushData by total_transaction_value so that all dots will be visiable
+	
 
 		return data
 	})();
@@ -204,7 +214,18 @@ var vis = function(data){
 					 + d.target + '</p><p>Transaction Status: ' + d.transaction_status + '</p><p class="value">Total Transaction Value ($USDmm, Historical rate):' +
 					 + d.total_transaction_value + '</p><p>Target State: ' + d.target_state +
 					 '</p><p>Transaction Comments: ' +d.transaction_comments + '</p></div>'
-				});
+				})
+				.on('mouseover', function(d) {
+					d3.select('.row.'+d.name).style('background-color', colors[d.name])
+									.style('color', 'white');
+				})
+				.on('mouseout', function(d) {
+					d3.select('.row.' + d.name)
+						.style('background-color', null)
+						.style('color', 'black');
+				})
+
+
 			mini.append('g')
 				.attr('class', 'x axis')
 				.attr('transform', 'translate(0,' + (10+miniHeight) + ')')
@@ -239,7 +260,6 @@ var vis = function(data){
 		}
 
 		function brushed() {
-			
 			x.domain(brush.empty() ? mini_x.domain() : brush.extent());
 			
 			main.selectAll('.main.circle')
@@ -252,9 +272,6 @@ var vis = function(data){
 			main.select('.x.axis').call(xAxis);
 			
 		}	
-
-
-
 
 		return brushChart;
 	})()
