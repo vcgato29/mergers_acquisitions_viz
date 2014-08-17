@@ -139,7 +139,8 @@ var vis = function(data){
 				total_transaction_value: t['Total Transaction Value ($USDmm, Historical rate)'],
 				transaction_comments: t['Transaction Comments'],
 				target_state: t['State/Region From Primary Address [Target/Issuer]'],
-				randomNum: t['Total Transaction Value ($USDmm, Historical rate)'] > 0 ? Math.random()-1 : Math.random()*2-1
+				//randomNum: t['Total Transaction Value ($USDmm, Historical rate)'] > 0 ? Math.random()-1 : Math.random()*2-1
+				randomNum: Math.random()*2-1
 			}
 		})
 		//sort brushData by total_transaction_value so that all dots will be visiable
@@ -152,11 +153,11 @@ var vis = function(data){
 
 	var brushChart = (function() {
 		var brushChart = {};
-		var main_margin = {top: 40, right: 40, bottom: 100, left: 60};
-		var mini_margin = {top: 240, right: 40, bottom: 60, left: 60}
+		var main_margin = {top: 40, right: 40, bottom: 150, left: 60};
+		var mini_margin = {top: 240, right: 40, bottom: 110, left: 60}
 		var width = 960 - main_margin.left - main_margin.right;
-		var mainHeight = 300 - main_margin.top - main_margin.bottom;
-		var miniHeight = 320 - mini_margin.top - mini_margin.bottom;
+		var mainHeight = 350 - main_margin.top - main_margin.bottom;
+		var miniHeight = 370 - mini_margin.top - mini_margin.bottom;
 		var x = d3.time.scale().range([0, width]);
 		var mini_x = d3.time.scale().range([0, width]);
 		var main_y = d3.scale.linear().range([mainHeight, 0]);
@@ -402,7 +403,7 @@ var vis = function(data){
 			bottom: 60,
 			left: 60
 			}
-		var tsWidth = 500 - margin.left - margin.right;
+		var tsWidth = 650 - margin.left - margin.right;
 		var tsHeight = 300 - margin.top - margin.bottom;
 		var controlWidth = 100;
 		var controlHeight = 400;
@@ -477,7 +478,10 @@ var vis = function(data){
 				.attr('dy', '.71em')
 				.style('text-anchor', 'end');
 		tsChartSVG.append('g').attr('class', 'y grid');
-
+		tsChartSVG.append('text').attr('class', 'title')
+				.attr('x', tsWidth/2)
+				.attr('y', -10)
+				.attr('text-anchor', 'middle');
 		
 		tsChart.plot = function(opt) {
 			var variable = opt.variable;
@@ -512,7 +516,7 @@ var vis = function(data){
 			})])
 			//console.log(x.domain())
 			//console.log(y.domain())
-			tsChartSVG.select('.y.grid').call(make_y_axis().tickSize(-tsWidth, 0, 0).tickFormat(''));
+			tsChartSVG.select('.y.grid').call(make_y_axis().tickSize(-tsWidth, 0, 0).tickFormat('').ticks(5));
 			tsChartSVG.select('.x.axis').attr('transform', 'translate(0,' + tsHeight + ')')
 				.transition()
 				.call(xAxis);
@@ -522,7 +526,8 @@ var vis = function(data){
 				.call(yAxis);
 				
 			
-			tsChartSVG.select('.y_text').text(variable);
+			//tsChartSVG.select('.y_text').text(variable);
+			tsChartSVG.select('.title').text(variable);
 			tsChartSVG.selectAll('.ts_line').remove();
 			tsChartSVG.selectAll('.ts_line').data(lines_data.map(function(l){ return l.ts_values; }))
 				.enter()
@@ -604,7 +609,8 @@ var vis = function(data){
 				.attr('class', 'y axis')
 				.call(yAxis)
 				.append('text')
-				.attr('transform', 'rotate(-90)')
+				//.attr('transform', 'rotate(-90)')
+				.attr('x', 30)
 				.attr('y', 6)
 				.attr('dy', '.71em')
 				.style('text-anchor', 'end')
