@@ -59,7 +59,7 @@ var vis = function(data){
 		var render = function() {
 			brushChart.plot();
 			pieChart.plot();
-			groupBarChart.plot();
+			
 		};
 		controller.init = function() {
 			render();
@@ -93,10 +93,13 @@ var vis = function(data){
 			}
 		})
 		
-		
-		data.groupBarData = []
-		data.types = ['Executive/Board Changes - Other', 'Lawsuits & Legal Issues', 'Business Expansions'].reverse();
+		data.companies = d3.keys(data.byType).map(function(t) {
+			return getShortName(t)
+		});
+		//data.groupBarData = []
+		//data.types = ['Executive/Board Changes - Other', 'Lawsuits & Legal Issues', 'Business Expansions'].reverse();
 		//data.company_short_names = [];
+		/*
 		for (var c_name in data.byType) {
 			//company_short_names.push(getShortName(c_name));
 			data.groupBarData.push({
@@ -107,6 +110,7 @@ var vis = function(data){
 				})
 			})
 		}
+		*/
 		data.byText = d3.nest().key(function(d) {
 			return d['Company Name(s)']
 		}).entries(data.text);
@@ -377,8 +381,6 @@ var vis = function(data){
 					return colors[d.data.name];
 				})
 				.on('click', function(d) {
-					//controller.something
-					console.log('click ', d)
 					console.log(data.acquirer_activies)
 				})
 				.on('mouseover', function(d) {
@@ -465,11 +467,10 @@ var vis = function(data){
 			}
 		var tsWidth = 650 - margin.left - margin.right;
 		var tsHeight = 300 - margin.top - margin.bottom;
-		var controlWidth = 100;
-		var controlHeight = 400;
-		var controlSVG = d3.select('svg.control');
+		
 		//create select bars
 		(function() {
+
 			d3.select('#variable-selector').append('select')
 				.selectAll('option')
 				.data(data.variables)
@@ -477,20 +478,27 @@ var vis = function(data){
 				.append('option')
 				.attr('value', function(d) { return d; })
 				.text(function(d) { return d; });
-			d3.select('#company-multi-selector').append('select')
-				.attr('id', 'multi-selected-options')
-				.attr('multiple', 'multiple')
-				.selectAll('option')
-				.data(data.groupBarData.map(function(d) { return d.name; }))
+			
+			var companyGroup = d3.select('#company-multi-selector').append('select')
+				.attr('id', 'optgroup')
+				.attr('multiple', 'multiple');
+
+			var companyMultiSelector = companyGroup.append('optgroup')
+				.attr('label', 'Select Companies')
+				;
+
+			companyMultiSelector.selectAll('option')
+				.data(data.companies)
 				.enter()
 				.append('option')
 				.attr('value', function(d) { return d; })
 				.text(function(d) { return d; });
 		
-			$('#multi-selected-options').multiSelect();
-			$('#updatebutton').on('click', function() {
+			$('#financial #optgroup').multiSelect();
+			$('.ms-selection .ms-optgroup-label span').text('Select To Remove');
+			$('#financial #updatebutton').on('click', function() {
 				var selected_companies = []
-				$('.ms-elem-selection.ms-selected span').each(function(i, d) {
+				$('#financial .ms-elem-selection.ms-selected span').each(function(i, d) {
 					selected_companies.push(d.innerText)
 				})
 				var variable = $('#variable-selector option:selected').val();
@@ -667,8 +675,42 @@ var vis = function(data){
 			bottom: 60,
 			left: 40
 			}
-		var barWidth = 700 - margin.left - margin.right;
+		var barWidth = 960 - margin.left - margin.right;
 		var barHeight = 400 - margin.top - margin.bottom;
+
+		(function() {
+
+			var eventsGroup = d3.select('#event-multi-selector').append('select')
+				.attr('id', 'optgroup')
+				.attr('multiple', 'multiple');
+			var eventMultiSelector = eventsGroup.append('optgroup')
+				.attr('label', 'Select Events');
+
+			eventMultiSelector.selectAll('option')
+				.data(data.allEvents)
+				.enter()
+				.append('option')
+				.attr('value', function(d) { return d; })
+				.text(function(d) { return d; });
+
+			$('#company-activities #optgroup').multiSelect({});
+			$('.ms-selection .ms-optgroup-label span').text('Select To Remove');
+
+			$('#company-activities #updatebutton').on('click', function() {
+				var selected_events = [];
+				$('#company-activities .ms-elem-selection.ms-selected span').each(function(i, d) {
+					selected_events.push(d.innerText)
+				})
+				
+				state = {
+					selected_events: selected_events
+				}
+				groupBarChart.plot(state);
+			})
+
+		})()
+
+
 		var x0 = d3.scale.ordinal()
 				.rangeRoundBands([0, barWidth], 0.1);
 		var	x1 = d3.scale.ordinal();
@@ -684,7 +726,7 @@ var vis = function(data){
 			.attr('height', barHeight + margin.top + margin.bottom)
 			.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-		
+		var eventsColors = d3.scale.category20().domain(data.allEvents);
 		function make_y_axis() {
 			return d3.svg.axis().scale(y).orient('left');
 		}
@@ -697,46 +739,81 @@ var vis = function(data){
 			.attr('height', barHeight);
 		groupBarChartSVG.append('g').attr('class', 'y grid');
 		groupBarChartSVG.select('.y.grid').call(make_y_axis().tickSize(-barWidth, 0, 0).tickFormat(''));
-		groupBarChart.plot = function() {
-			x0.domain(data.groupBarData.map(function(d) { return d.name; }));
-			x1.domain(data.types).rangeRoundBands([0, x0.rangeBand()]);
-			y.domain([0, 1.2*d3.max(data.groupBarData, function(d) {
+		groupBarChartSVG.append('g')
+				.attr('class', 'y axis');
+		groupBarChartSVG.select('.y.axis')
+			.append('text')
+			.attr('class', 'y_text')
+			.attr('x', 30)
+			.attr('y', -26)
+			.attr('dy', '.71em')
+			.style('text-anchor', 'end');
+		groupBarChartSVG.append('g')
+				.attr('class', 'x axis')
+				.attr('transform', 'translate(0,' + barHeight + ')')
+				;
+
+		groupBarChart.plot = function(opt) {
+			var selected_events = opt.selected_events;
+			console.log(selected_events)
+			var groupBarData = []
+			for (var c_name in data.byType) {
+				groupBarData.push({
+					name: getShortName(c_name),
+					company_name: c_name,
+					activities: selected_events.map(function(e) {
+						return { type: e, value: data.byType[c_name][e] || 0}
+					})
+				})
+			}
+
+
+			x0.domain(groupBarData.map(function(d) { return d.name; }));
+			x1.domain(selected_events).rangeRoundBands([0, x0.rangeBand()]);
+			y.domain([0, 1.2*d3.max(groupBarData, function(d) {
 				return d3.max(d.activities, function(a) {
 					return a.value;
 				})
 			})])
 			
-			groupBarChartSVG.append('g')
-				.attr('class', 'x axis')
-				.attr('transform', 'translate(0,' + barHeight + ')')
-				.call(xAxis);
-			groupBarChartSVG.append('g')
-				.attr('class', 'y axis')
-				.call(yAxis)
-				.append('text')
-				//.attr('transform', 'rotate(-90)')
-				.attr('x', 30)
-				.attr('y', 6)
-				.attr('dy', '.71em')
-				.style('text-anchor', 'end')
-				.text('#activities');
+			
+			groupBarChartSVG.select('.x.axis').call(xAxis);
+			groupBarChartSVG.select('.y.axis')
+				.transition()
+				.call(yAxis);
+				
+			groupBarChartSVG.select('.y_text').text('#activities');
 
 			var company = groupBarChartSVG.selectAll('.company')
-				.data(data.groupBarData)
-				.enter()
+				.data(groupBarData);
+
+			company.enter()
 				.append('g')
 				.attr('class', 'company activities')
 				.attr('transform', function(d) { return 'translate(' + x0(d.name) + ',0)'; });
-			company.selectAll('rect')
-				.data(function(d) { return d.activities; })
-				.enter()
+			
+			//company.selectAll('.smallbar').remove();
+			var bars = company.selectAll('.smallbar')
+				.data(function(d) { return d.activities; });
+
+			bars.enter()
 				.append('rect')
+				.attr('class', 'smallbar')
+				.attr('width', x1.rangeBand())
+				.attr('x', function(d) { return 0; })
+				.attr('y', function(d) { return barHeight; })
+				//.attr('height', function(d) { return barHeight - y(d.value); })
+				.style('fill', function(d, i) { return eventsColors(d.type); });;
+
+			bars.transition()
 				.attr('width', x1.rangeBand())
 				.attr('x', function(d) { return x1(d.type); })
 				.attr('y', function(d) { return y(d.value); })
 				.attr('height', function(d) { return barHeight - y(d.value); })
-				.style('fill', function(d, i) { return bar_colors[d.type]; })
-
+				.style('fill', function(d, i) { return eventsColors(d.type); });
+			bars.exit().transition().style('opacity', 0).remove();
+				
+				/*
 			var legend = groupBarChartSVG.selectAll('.legend')
 				.data(data.types)
 				.enter().append('g')
@@ -756,7 +833,7 @@ var vis = function(data){
 				.style('text-anchor', 'start')
 				.text(function(d) { return d; })
 				.attr('font-size', '14px')
-
+	*/
 
 
 		}

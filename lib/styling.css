@@ -14,9 +14,10 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
 #vis .content #pie-wrapper {float: left;}
 #vis .content #ts-wrapper {float: right;}
 */
-.ms-container { width: 250px;}
+#financial .ms-container { width: 250px;}
+#company-activities .ms-container { width: 960px;}
 
-
+#financial .ms-optgroup-label {font-size: 12px;}
 
 .pie_table { float: left;}
 .grid .tick {
@@ -27,7 +28,9 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
   stroke-width: 3px;
 }
 
-#vis .content #company-multi-selector { width: 300px;}
+/*#vis .content #company-multi-selector { width: 300px;}
+#vis .content #event-multi-selector { width: 400px;}
+*/
 #vis .content #ts-wrapper .ts_line { stroke-width: 3px; fill: none;}
 #vis .content #control-wrapper {float: left;}
 #vis .content #ts-wrapper {float: left;}
