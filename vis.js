@@ -85,6 +85,15 @@ var vis = function(data){
 							   .rollup(function(leaves) { return leaves.length; })
 							   .map(data.text, d3.map);
 
+		var allEvents = data.text.map(function(t) { return t['Key Developments by Type']; });
+		data.allEvents = [];
+		allEvents.forEach(function(e) {
+			if (data.allEvents.indexOf(e) < 0) {
+				data.allEvents.push(e)
+			}
+		})
+		
+		
 		data.groupBarData = []
 		data.types = ['Executive/Board Changes - Other', 'Lawsuits & Legal Issues', 'Business Expansions'].reverse();
 		//data.company_short_names = [];
@@ -128,7 +137,7 @@ var vis = function(data){
 		})
 		
 		data.brushData = data.sortedTransactions.map(function(t) {
-			console.log(t['Total Transaction Value ($USDmm, Historical rate)'])
+	
 			return {
 				announce_date: dateParse(t['All Transactions Announced Date']),
 				str_announce_date: t['All Transactions Announced Date'],
@@ -155,7 +164,7 @@ var vis = function(data){
 		var brushChart = {};
 		var main_margin = {top: 40, right: 40, bottom: 150, left: 60};
 		var mini_margin = {top: 240, right: 40, bottom: 110, left: 60}
-		var width = 960 - main_margin.left - main_margin.right;
+		var width = 760 - main_margin.left - main_margin.right;
 		var mainHeight = 350 - main_margin.top - main_margin.bottom;
 		var miniHeight = 370 - mini_margin.top - mini_margin.bottom;
 		var x = d3.time.scale().range([0, width]);
@@ -188,6 +197,25 @@ var vis = function(data){
 				.x(mini_x)
 				.on('brush', brushed);
 		
+		var boxWidth = 200;
+		var boxHeight = 300
+		//add a rect border for side-info display		
+			var sideinfoSVG = d3.select('#side-info')
+			.append('svg')
+			.attr('width', boxWidth)
+			.attr('height', boxHeight)
+
+			var rect = sideinfoSVG.append('rect')
+						.attr('x', 5)
+						.attr('y', 5)
+						.attr('width', boxWidth-10)
+						.attr('height', boxHeight-10)
+						.style('fill', 'none')
+						.attr('stroke', 'steelblue')
+						.attr('stroke-width', 2)
+						;
+
+	
 		brushChart.plot = function() {
 			main.append('g')
 				.attr('class', 'x axis')
@@ -210,12 +238,14 @@ var vis = function(data){
 					return colors[d.name]
 				})
 				.style('opacity', 0.6)
+				/*
 				.attr('title', function(d, i) {
 					return '<div class="transaction-info"><p>Announced Date: ' + d.str_announce_date + '</p><p>Buyers: ' + d.buyers + '</p><p>Target: '
 					 + d.target + '</p><p>Transaction Status: ' + d.transaction_status + '</p><p class="value">Total Transaction Value ($USDmm, Historical rate):' +
 					 + d.total_transaction_value + '</p><p>Target State: ' + d.target_state +
 					 '</p><p>Transaction Comments: ' +d.transaction_comments + '</p></div>'
 				})
+				*/
 				.on('mouseover', function(d) {
 					d3.select('.row.'+d.name).style('background-color', colors[d.name])
 									.style('color', 'white');
@@ -225,6 +255,34 @@ var vis = function(data){
 						.style('background-color', null)
 						.style('color', 'black');
 				})
+				.on('click', function(d) {
+					var transaction_info = {
+						'Announce_date': d.str_announce_date,
+						'Buyers': d.buyers,
+						'Target': d.target,
+						'Transaction Status': d.transaction_status,
+						'Total Transaction Value ($USDmm, Historical rate)': d.total_transaction_value,
+						'Target State': d.target_state
+						};
+					var transaction_text = d3.entries(transaction_info);
+					
+					sideinfoSVG.select('.text').remove();
+					text = sideinfoSVG.append('foreignObject')
+						.attr('x', 10)
+						.attr('y', 10)
+						.attr('class', 'text')
+						.attr('width', boxWidth-20)
+						.attr('height', boxHeight-20)
+						.append('xhtml:body')
+						.html('<div class="transaction-info" style="width: 170px;"><p>Announced Date: ' + d.str_announce_date + '</p><p>Buyers: ' + d.buyers + '</p><p>Target: '
+					 + d.target + '</p><p>Transaction Status: ' + d.transaction_status + '</p><p class="value">Total Transaction Value ($USDmm, Historical rate):' +
+					 + d.total_transaction_value + '</p><p>Target State: ' + d.target_state +
+					 '</p></div>')
+						.style('background', 'none')
+
+		
+
+				 })
 
 
 			mini.append('g')
@@ -254,10 +312,12 @@ var vis = function(data){
 				.style('fill', function(d) {
 					return colors[d.name] })
 				.style('opacity', 0.6)
+			/*	
 			$('.main.circle').tipsy({
 				html: true,
 				gravity: 's'
 			});	
+*/
 		}
 
 		function brushed() {
@@ -267,9 +327,9 @@ var vis = function(data){
 				.attr('cx', function(d) { return x(d.announce_date); })
 				.attr('cy', function(d) { return main_y(16*d.randomNum); })
 				
-				.on('click', function(d) {
-					alert('Click!')
-				})
+				// .on('click', function(d) {
+				// 	alert('Click!')
+				// })
 			main.select('.x.axis').call(xAxis);
 			
 		}	
@@ -399,9 +459,9 @@ var vis = function(data){
 		var tsChart = {};
 		var margin = {
 			top: 40,
-			right: 40,
+			right: 70,
 			bottom: 60,
-			left: 60
+			left: 40
 			}
 		var tsWidth = 650 - margin.left - margin.right;
 		var tsHeight = 300 - margin.top - margin.bottom;
@@ -450,7 +510,7 @@ var vis = function(data){
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
 		var line = d3.svg.line()
-					.x(function(d) { console.log(d); return x(d.year); })
+					.x(function(d) { return x(d.year); })
 					.y(function(d) { return y(d.value); })
 
 		var x = d3.time.scale().range([0, tsWidth]);
@@ -464,19 +524,26 @@ var vis = function(data){
 			.orient('left')
 			.tickFormat(d3.format('.3s'))
 			.ticks(5);
+		var valueFormat = d3.format('.3s');
 		function make_y_axis() {
 			return d3.svg.axis().scale(y).orient('left');
 		}
 		tsChartSVG.append('g')
-				.attr('class', 'x axis');
-			tsChartSVG.append('g')
-				.attr('class', 'y axis');
-			tsChartSVG.select('.y.axis').append('text')
-				.attr('class', 'y_text')
-				.attr('transform', 'rotate(-90)')
-				.attr('y', 6)
-				.attr('dy', '.71em')
-				.style('text-anchor', 'end');
+			.attr('class', 'x axis');
+		tsChartSVG.select('.x.axis').append('text')
+			.attr('x', tsWidth/2)
+			.attr('y', 40)
+			.attr('class', 'ts_x_text')
+			.style('text-anchor', 'middle')
+			;
+		tsChartSVG.append('g')
+			.attr('class', 'y axis');
+		tsChartSVG.select('.y.axis').append('text')
+			.attr('class', 'y_text')
+			.attr('transform', 'rotate(-90)')
+			.attr('y', 6)
+			.attr('dy', '.71em')
+			.style('text-anchor', 'end');
 		tsChartSVG.append('g').attr('class', 'y grid');
 		tsChartSVG.append('text').attr('class', 'title')
 				.attr('x', tsWidth/2)
@@ -514,8 +581,7 @@ var vis = function(data){
 					return t.value;
 				})
 			})])
-			//console.log(x.domain())
-			//console.log(y.domain())
+			tsChartSVG.select('.ts_x_text').text('year');
 			tsChartSVG.select('.y.grid').call(make_y_axis().tickSize(-tsWidth, 0, 0).tickFormat('').ticks(5));
 			tsChartSVG.select('.x.axis').attr('transform', 'translate(0,' + tsHeight + ')')
 				.transition()
@@ -538,17 +604,56 @@ var vis = function(data){
 					return colors[t[0]['company']]
 				});
 			
-			tsChartSVG.selectAll('.circle').remove();
-			tsChartSVG.selectAll('.circle')
+			tsChartSVG.selectAll('.ts-circle').remove();
+			tsChartSVG.selectAll('.ts-circle')
 				.data([].concat.apply([], lines_data.map(function(l){ return l.ts_values; })))
 				.enter()
 				.append('circle')
-				.attr('class', 'circle')
+				.attr('class', 'ts-circle')
 				.attr('r', 3)
 				.attr('cx', function(d) { return x(d.year); })
 				.attr('cy', function(d) { return y(d.value); })
-				.style('fill', function(d) { return colors[d['company']]});
+				.attr('title', function(d) {
+					return '<div class=ts-info><p>Company: ' + d.company + '</p><p>Year:' + yearFormat(d.year) + '</p><p>Value: ' + valueFormat(d.value) + '</p></div>';
+				})
+				.style('fill', function(d) { return colors[d['company']]})
+				.on('mouseover', function(d) {
+					d3.select(this).transition().attr('r', 5);
+				})
+				.on('mouseout', function() {
+					d3.select(this).transition().attr('r', 3);
+				})
+				;
+			$('.ts-circle').tipsy({
+				html: true,
+				gravity: 's'
 
+			});
+
+
+			//draw legends
+			tsChartSVG.selectAll('.legend').remove();
+			var legend = tsChartSVG.selectAll('.legend')
+				.data(selected_companies)
+				.enter().append('g')
+				.attr('class', 'legend')
+				.attr('transform', function(d, i) {
+					return 'translate(0,' + i* 20 + ')';
+				});
+			legend.append('rect')
+				.attr('x', tsWidth + 10)
+				.attr('width', 14)
+				.attr('height', 14)
+				.style('fill', function(d) {
+					return colors[d];
+				})
+			legend.append('text')
+				.attr('x', tsWidth + 26)
+				.attr('y', 8)
+				.attr('dy', '.35em')
+				.style('text-anchor', 'start')
+				.text(function(d) { return d; })
+				.attr('font-size', '12px')
 		}
 
 	})();
