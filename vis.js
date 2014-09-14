@@ -809,11 +809,14 @@ var vis = function(data){
 				.attr('y', function(d) { return barHeight; })
 				//.attr('height', function(d) { return barHeight - y(d.value); })
 				.style('fill', function(d, i) { return eventsColors(d.type); })
-				.on('click', function(d) {
-					console.log(d);
-				})
 				.attr('title', function(d) {
 					return '<div class="event-info"><p>Event: ' + d.type + '</p><p># activities: ' + d.value + '</p></div>'
+				})
+				.on('mouseover', function() {
+					d3.select(this).style('opacity', 0.8);
+				})
+				.on('mouseout', function() {
+					d3.select(this).style('opacity', 1);
 				});
 			$('.smallbar').tipsy({
 				html: true,
