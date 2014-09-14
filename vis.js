@@ -762,11 +762,16 @@ var vis = function(data){
 					name: getShortName(c_name),
 					company_name: c_name,
 					activities: selected_events.map(function(e) {
+						console.log(data.byType[c_name])
 						return { type: e, value: data.byType[c_name][e] || 0}
 					})
 				})
 			}
 
+			d3.selectAll('.ms-elem-selection.ms-selected')
+				.style('background', function(d, i) { return eventsColors(selected_events[i])})
+				.style('color', 'white')
+				;
 
 			x0.domain(groupBarData.map(function(d) { return d.name; }));
 			x1.domain(selected_events).rangeRoundBands([0, x0.rangeBand()]);
@@ -803,15 +808,30 @@ var vis = function(data){
 				.attr('x', function(d) { return 0; })
 				.attr('y', function(d) { return barHeight; })
 				//.attr('height', function(d) { return barHeight - y(d.value); })
-				.style('fill', function(d, i) { return eventsColors(d.type); });;
+				.style('fill', function(d, i) { return eventsColors(d.type); })
+				.on('click', function(d) {
+					console.log(d);
+				})
+				.attr('title', function(d) {
+					return '<div class="event-info"><p>Event: ' + d.type + '</p><p># activities: ' + d.value + '</p></div>'
+				});
+			$('.smallbar').tipsy({
+				html: true,
+				gravity:  's'
+			})
 
 			bars.transition()
 				.attr('width', x1.rangeBand())
 				.attr('x', function(d) { return x1(d.type); })
 				.attr('y', function(d) { return y(d.value); })
 				.attr('height', function(d) { return barHeight - y(d.value); })
-				.style('fill', function(d, i) { return eventsColors(d.type); });
+				.style('fill', function(d, i) { return eventsColors(d.type); })
+				;
+
 			bars.exit().transition().style('opacity', 0).remove();
+				
+
+		// 
 				
 				/*
 			var legend = groupBarChartSVG.selectAll('.legend')

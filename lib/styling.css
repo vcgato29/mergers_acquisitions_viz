@@ -63,6 +63,9 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
   text-align: left;
 }
 
+.tipsy .tipsy-inner div.event-info {
+  text-align: left;
+}
 /*
 .tipsy .tipsy-inner div.transaction-info p{
   margin-bottom: 2px;
@@ -81,6 +84,12 @@ div.ts-info p{
   margin-bottom: 2px;
   margin-top: 1px;
   
+}
+
+
+div.event-info p{
+  margin-bottom: 2px;
+  margin-top: 1px; 
 }
 
 
