@@ -117,3 +117,7 @@ div.event-info p{
   font-size:16px;
 }
 
+#vis #company-activities li.ms-optgroup-label{
+  margin-left: 5px;
+}
+

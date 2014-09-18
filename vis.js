@@ -415,7 +415,8 @@ var vis = function(data){
 				.data(columns)
 				.enter()
 				.append('th')
-				.text(function(d) { return d; });
+				.text(function(d) { return d.charAt(0).toUpperCase() + d.slice(1); });
+
 
 			var rows = tbody.selectAll('tr')
 				.data(pie(data.pieData))
