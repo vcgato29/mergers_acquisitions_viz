@@ -768,7 +768,7 @@ var vis = function(data){
 				})
 			}
 
-			d3.selectAll('.ms-elem-selection.ms-selected')
+			d3.selectAll('#company-activities .ms-elem-selection.ms-selected')
 				.style('background', function(d, i) { return eventsColors(selected_events[i])})
 				.style('color', 'white')
 				;
