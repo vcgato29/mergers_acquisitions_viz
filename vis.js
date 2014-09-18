@@ -797,7 +797,7 @@ var vis = function(data){
 				.attr('class', 'company activities')
 				.attr('transform', function(d) { return 'translate(' + x0(d.name) + ',0)'; });
 			
-			company.selectAll('.smallbar').remove();
+			//company.selectAll('.smallbar').remove();
 			var bars = company.selectAll('.smallbar')
 				.data(function(d) { return d.activities; });
 
@@ -811,11 +811,7 @@ var vis = function(data){
 				.attr('y', function(d) { return barHeight; })
 				//.attr('height', function(d) { return barHeight - y(d.value); })
 				.style('fill', function(d, i) { return eventsColors(d.type); })
-				.attr('title', function(d) {
-
-					return '<div class="event-info"><p>Event: ' + d.type + '</p><p># activities: ' + d.value + '</p></div>'
-					
-				})
+				
 				.on('mouseover', function(d) {
 					console.log(d)
 					d3.select(this).style('opacity', 0.8);
@@ -823,10 +819,7 @@ var vis = function(data){
 				.on('mouseout', function() {
 					d3.select(this).style('opacity', 1);
 				});
-			$('.smallbar').tipsy({
-				html: true,
-				gravity:  's'
-			})
+			
 
 			bars.transition()
 				.attr('width', x1.rangeBand())
@@ -837,6 +830,15 @@ var vis = function(data){
 				;
 
 			bars.exit().transition().style('opacity', 0).remove();
+			bars.attr('title', function(d) {
+
+					return '<div class="event-info"><p>Event: ' + d.type + '</p><p># activities: ' + d.value + '</p></div>'
+					
+				})
+			$('.smallbar').tipsy({
+				html: true,
+				gravity:  's'
+			})
 				
 
 		// 
