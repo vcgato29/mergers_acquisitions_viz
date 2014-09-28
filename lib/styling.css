@@ -6,7 +6,7 @@ header .content h1{margin:0;text-align:center;font-size:40px}
 
 body{font-family:'Helvetica Neue',Helvetica,sans-serif;background-image:url("/img/grey.png");background-repeat:repeat;margin:0;min-width:980px;}
 h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
-#vis{padding:35px 0 20px;height:1600px;background-color:rgba(255,255,255,0.75);-webkit-box-shadow:0 0 10px rgba(0,0,0,0.5);-moz-box-shadow:0 0 10px rgba(0,0,0,0.5);-ms-box-shadow:0 0 10px rgba(0,0,0,0.5);-o-box-shadow:0 0 10px rgba(0,0,0,0.5);box-shadow:0 0 10px rgba(0,0,0,0.5);}
+#vis{padding:35px 0 20px;height:1800px;background-color:rgba(255,255,255,0.75);-webkit-box-shadow:0 0 10px rgba(0,0,0,0.5);-moz-box-shadow:0 0 10px rgba(0,0,0,0.5);-ms-box-shadow:0 0 10px rgba(0,0,0,0.5);-o-box-shadow:0 0 10px rgba(0,0,0,0.5);box-shadow:0 0 10px rgba(0,0,0,0.5);}
 #vis .content{width:960px;padding:0 10px;margin:0 auto;position:relative;}
 #vis .content .legend-element{font-size:10px}
 #vis .content #loading{text-align:center;position:absolute;left:0;right:0;top:260px;font-size:50px;color:#737373}
@@ -14,10 +14,10 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
 #vis .content #pie-wrapper {float: left;}
 #vis .content #ts-wrapper {float: right;}
 */
-#financial .ms-container { width: 250px;}
+#finance .ms-container { width: 250px;}
 #company-activities .ms-container { width: 960px;}
 
-#financial .ms-optgroup-label {font-size: 12px;}
+#finance .ms-optgroup-label {font-size: 12px;}
 
 .pie_table { float: left;}
 .grid .tick {
@@ -30,10 +30,19 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
 
 /*#vis .content #company-multi-selector { width: 300px;}
 #vis .content #event-multi-selector { width: 400px;}
-*/
-#vis .content #ts-wrapper .ts_line { stroke-width: 3px; fill: none;}
 #vis .content #control-wrapper {float: left;}
 #vis .content #ts-wrapper {float: left;}
+
+*/
+
+
+#vis .content #finance .ts_line { stroke-width: 3px; fill: none;}
+
+#vis .content #financial-control-wrapper {float: left; clear: both;}
+#vis .content #ts-wrapper {float: right;}
+
+#vis .content #company-activities {clear: both;}
+
 .brush .extent {
   stroke: #fff;
   fill-opacity: .125;
@@ -43,8 +52,8 @@ h1,h2,h3,h4,h5,h6{color:#525252;font-weight:normal}
 #vis .content #main #brush-wrapper .brushchart {float:left;}
 #vis .content #main #brush-wrapper .brushchart .x.axis path{display: none;}
 #vis .content #main #brush-wrapper .brushchart .x.axis { font-size: 14px;}
-#vis #financial #ts-wrapper .tschart .axis path, .axis line { fill: none; stroke: #000; shape-rendering: crispEdges;}
-#vis #financial #ts-wrapper .tschart .axis { font-size: 12px;}
+#vis #finance #ts-wrapper .tschart .axis path, .axis line { fill: none; stroke: #000; shape-rendering: crispEdges;}
+#vis #finance #ts-wrapper .tschart .axis { font-size: 12px;}
 #vis #company-activities #bar-wrapper .barchart .axis path, .axis line { fill: none; stroke: #000; shape-rendering: crispEdges;}
 #vis #company-activities #bar-wrapper .barchart .axis { font-size: 14px;}
 
@@ -113,7 +122,7 @@ div.event-info p{
 
 }
 
-#vis #ts-wrapper .tschart .ts_x_text {
+#vis .tschart .ts_x_text {
   font-size:16px;
 }
 
@@ -121,3 +130,52 @@ div.event-info p{
   margin-left: 5px;
 }
 
+#vis #finance li.ms-optgroup-label{
+  margin-left: 5px;
+}
+
+#vis #comments-box{
+  width: 100%;
+  height: 150px;
+  border-color: steelblue;
+  overflow: auto;
+  border-style: solid;
+}
+#vis #comments-header{
+  margin-bottom: 3px;
+  font-size: 17px;
+  font-weight: bold;
+  text-align: center;
+}
+#vis #comments-box #comments-body{
+  margin-top: 4px;
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+
+#vis #transactions #pie-wrapper svg.piechart {
+  float:left;
+}
+
+#vis #transactions #pie-wrapper p#activities-header {
+  margin-bottom: 3px;
+  font-size: 17px;
+  font-weight: bold;
+  text-align: center;
+}
+
+#vis #transactions #pie-wrapper .activities-area {
+  height: 230px;
+  border-color: steelblue;
+  overflow: auto;
+  border-style: solid;
+}
+
+#vis #transactions .activities-area p{
+  margin-bottom: 2.5px;
+  margin-top: 0px;
+  text-align: left;
+  margin-left: 4px
+
+}

@@ -18,24 +18,30 @@ html
         #main
           #brush-wrapper
             svg.brushchart
-          #side-info
+          p#comments-header Transaction Comments
+          #comments-box
+            p#comments-body
           
         #transactions
           #pie-wrapper
             svg.piechart
-        h2  
-        #financial
-          #control-wrapper 
+            table.pie_table
+            p#activities-header 
+              span.company-short-name 
+              | Activities
+            .activities-area
+              
+
+        #finance
+          #financial-control-wrapper 
             #variable-selector Variable
             #company-multi-selector
             button#updatebutton UPDATE
           #ts-wrapper
             svg.tschart
-
-        h2 Acquirer Activities
-        h3 Company Activities
+ 
         #company-activities
-          #control-wrapper
+          #activities-control-wrapper
             #event-multi-selector
             button#updatebutton UPDATE
           #bar-wrapper
